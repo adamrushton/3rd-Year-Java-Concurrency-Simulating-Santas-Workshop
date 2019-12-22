@@ -53,7 +53,11 @@ public class Sack {
     public int GetPresentCount() {
         return presentCount;
     }
-
+    
+    public void InsertPresent(Present p) {
+        
+    }
+    
     public void Insert(String item) {
         while (available == buffer.length) {
             System.out.println("Insert waiting");

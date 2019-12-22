@@ -10,7 +10,8 @@ package concurrency;
  * @author Adam
  */
 public class Turntable extends Thread {
-
+    Present[] presents;
+    int count = 0;
     String[] splittedData;
     final String INPUT_BELT = "ib";
     final String OUTPUT_BELT = "ob";
@@ -40,6 +41,11 @@ public class Turntable extends Thread {
         return -1;
     }
 
+    @Override
+    public void run() {
+        DetectWaitingGift();
+        // to-do run this 
+    }
     public Turntable(String dataForTurntable) {
         int northIndex = -1, eastIndex = -1, southIndex = -1, westIndex = -1;
         String[] direction = new String[4];
@@ -92,7 +98,9 @@ public class Turntable extends Thread {
         // Assuming that input belt is the first point of call
     }
 
-    public void DetectWaitingGift() {
+    public void DetectWaitingGift(ConveyorBelt belt) {
+        presents[count] = belt.Extract();
+        count++;
         // Table turn to receive the gift        
         // obtain destination sack for present
         // Table turn to line up with appropriate output port
@@ -107,16 +115,4 @@ public class Turntable extends Thread {
         // If turntable B from the config receives a gift destined for sack 4, it wil know to eject the gift to the south
         // Eject gift at final destination if reached
     }
-    /*
-    private structure AssignMovements(int index) {
-          if (splittedData[index] != null){
-            if (splittedData[index] == OUTPUT_BELT) {
-                return Integer.parseInt(splittedData[index+1]);
-            } else if (splittedData[index] == OUTPUT_SACK) {
-                return Integer.parseInt(splittedData[index+1]);
-            }
-        }
-          
-    }
-     */
 }

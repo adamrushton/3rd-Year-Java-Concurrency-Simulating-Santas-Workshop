@@ -16,43 +16,43 @@ package concurrency;
 public final class Hopper extends Thread {
 
     String[] splittedData;
-    ConveyorBelt[] belt;
     Present[] present;
-    Turntable[] turntable;
+    ConveyorBelt belt;
     int hopperId, beltId, capacity, speed;
     String range;
 
-    Hopper(String dataForHopper, ConveyorBelt[] belt, Turntable[] turntable) {
+    Hopper(String dataForHopper, Present[] present, ConveyorBelt[] belt) {
         splittedData = dataForHopper.split("\\s+");
         hopperId = Integer.parseInt(splittedData[0]);
         beltId = Integer.parseInt(splittedData[2]);
         capacity = Integer.parseInt(splittedData[4]);
         speed = Integer.parseInt(splittedData[6]);
-        this.belt = belt;
-        this.turntable = turntable;
+        
+        // Get all presents and get the connecting belt
+        this.present = present;
+        
+        this.belt = belt[beltId];
     }
 
-    // Set presents when the id matches
-    public void LoadPresents(Present[] present) {
-        this.present = present;
+    @Override
+    public void run() {
         AddPresentToConveyorBelt();
+    }
+
+    private void AddPresentToConveyorBelt() {
+        // Passes 1 present onto the first conveyor belt        
+        if (!belt.BeltFull()) {
+            for (Present p : present) {
+                belt.Insert(p, p.GetCount());     
+            }
+        }
     }
 
     public int GetPresentCount() {
         if (present != null) {
             return present.length;
         }
-        return -1;
-    }
-
-    private void AddPresentToConveyorBelt() {
-        // Passes 1 present onto the first conveyor belt
-        if (!belt[0].BeltFull()) {
-            for (Present p : present) {
-                belt[0].AddPresentToBelt(p, turntable[0]);
-                System.out.println("Present " + p.GetName() + " has been added to conveyor belt 0 with turntable " + turntable[0] + " destination shoot is " + p.GetDestinationShoot());
-            }
-        }
+        return -1; // This will happen when the id on presents doesnt match a hopper id
     }
 
     public int GetHopperId() {
