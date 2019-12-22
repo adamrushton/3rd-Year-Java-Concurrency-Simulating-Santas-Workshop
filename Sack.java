@@ -5,18 +5,21 @@
  */
 package concurrency;
 
-import java.nio.Buffer;
-
 /**
  *
  * @author Adam
+ * Sack specification
+ * NOT threads
+ * Sacks are a fixed size array, acting as a buffer for depositing Presents
+ * Provide methods for turntables to determine if there is space in the sack
+ * i.e. Turntable can run methods from this class
  */
 public class Sack {
-    private String[] splittedData;
+    private final String[] splittedData;
 
-    private int sackId;
-    private int capacity;
-    private String ageRange;
+    private final int sackId;
+    private final int capacity;
+    private final String ageRange;
     private int presentCount;
     private int available;
     private int nextIn = 0;

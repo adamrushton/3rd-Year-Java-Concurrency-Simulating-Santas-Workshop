@@ -15,19 +15,7 @@ public class Turntable extends Thread {
     final String INPUT_BELT = "ib";
     final String OUTPUT_BELT = "ob";
     final String OUTPUT_SACK = "os";
-
-    char turntableId;
-    int inputBelt;
-
-    int firstMoveOutputSack = -1;
-    int firstMoveOutputBelt = -1;
-
-    int secondMoveOutputSack = -1;
-    int secondMoveOutputBelt = -1;
-
-    int thirdMoveOutputSack = -1;
-    int thirdMoveOutputBelt = -1;
-    int thirdMoveInputBelt = -1;
+    String turntableId;
 
     /*
     N E S W = North East South West
@@ -45,39 +33,65 @@ public class Turntable extends Thread {
     I am assuming we are always going N E S W movements.
      */
     // To-do. sort this data into appropiate variables
-    public Turntable(String dataForTurntable) {
-        splittedData = dataForTurntable.split("\\s+");
-        turntableId = splittedData[0].charAt(0);
-        
-        // Assuming that input belt is the first point of call
-        inputBelt = Integer.parseInt(splittedData[3]);
-
-        // First move
-        if (splittedData[5] == OUTPUT_BELT) {
-            firstMoveOutputBelt = Integer.parseInt(splittedData[6]);
-        } else if (splittedData[5] == OUTPUT_SACK) {
-            firstMoveOutputSack = Integer.parseInt(splittedData[6]);
+    private int CreateDirectionId(String[] direction, int position, int compassIndex) {
+        if (!"null".equals(direction[position])) {
+            return Integer.parseInt(splittedData[compassIndex + 2]);
         }
-        
-        // Second move
-        if (splittedData[8] != "null") {
-            if (splittedData[8] == OUTPUT_BELT) {
-                secondMoveOutputBelt = Integer.parseInt(splittedData[9]);
-            } else if (splittedData[8] == OUTPUT_SACK) {
-                secondMoveOutputSack = Integer.parseInt(splittedData[9]);
+        return -1;
+    }
+
+    public Turntable(String dataForTurntable) {
+        int northIndex = -1, eastIndex = -1, southIndex = -1, westIndex = -1;
+        String[] direction = new String[4];
+        int[] directionId = new int[4];
+        // Search for index locations of N, E, S, W
+        splittedData = dataForTurntable.split("\\s+");
+        //System.out.println("Splitted data: " + Arrays.toString(splittedData));
+
+        for (int i = 0; i < splittedData.length; i++) {
+            if (splittedData[i].equals("N")) {
+                northIndex = i;
+            }
+            if (splittedData[i].equals("E")) {
+                eastIndex = i;
+            }
+            if (splittedData[i].equals("S")) {
+                southIndex = i;
+            }
+            if (splittedData[i].equals("W")) {
+                westIndex = i;
             }
         }
+
+        turntableId = splittedData[0];
+
+        //System.out.println("ttid: " + turntableId);
+        //System.out.println("N: " + northIndex + " E: " + eastIndex + " S: " + southIndex + " W: " + westIndex);
+        //System.out.println("Splitted data for Turntable: " + splittedData.length);
+        direction[0] = splittedData[northIndex + 1];
+        direction[1] = splittedData[eastIndex + 1];
+        direction[2] = splittedData[southIndex + 1];
+        direction[3] = splittedData[westIndex + 1];
+        // Set string array to null, os, ib, ob 
+        // If there is an input belt, output belt or output sack, a directionId will be found
+        directionId[0] = CreateDirectionId(direction, 0, northIndex);
+        directionId[1] = CreateDirectionId(direction, 1, eastIndex);
+        directionId[2] = CreateDirectionId(direction, 2, southIndex);
+        directionId[3] = CreateDirectionId(direction, 3, westIndex);
+
+        //System.out.println("Direction 0: " + direction[0] + " DirectionId 0: " + directionId[0]);
+        //System.out.println("Direction 1: " + direction[1] + " DirectionId 1: " + directionId[1]);
+        //System.out.println("Direction 2: " + direction[2] + " DirectionId 2: " + directionId[2]);
+        //System.out.println("Direction 3: " + direction[3] + " DirectionId 3: " + directionId[3]);
         
-        //3rd move
-        if (splittedData[10] == OUTPUT_BELT) {
-            thirdMoveOutputBelt = Integer.parseInt(splittedData[11]);
-        } else if (splittedData[10] == OUTPUT_SACK) {
-            thirdMoveOutputSack = Integer.parseInt(splittedData[11]);
-        } else if (splittedData[11] == INPUT_BELT) {
-            thirdMoveInputBelt = Integer.parseInt(splittedData[11]);
-        }
+        // check index of N, E, S and W
+        // if value is not null, get the value after it
+        // null means empty, if a section is empty, don't check the value after it
+        // 2, 5, 8, 10 direction indexes
+        // 3, 6, 9, 11 values of direction
+        // Assuming that input belt is the first point of call
     }
-    
+
     public void DetectWaitingGift() {
         // Table turn to receive the gift        
         // obtain destination sack for present

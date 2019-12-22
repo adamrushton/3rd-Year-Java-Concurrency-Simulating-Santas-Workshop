@@ -8,20 +8,26 @@ package concurrency;
 /**
  *
  * @author Adam
+ * Specification of Present:
+ * NOT Threads
+ * Must be created at the start of the simulation
+ * After created, loaded into hopper (acting as a simulation for toys being distributed)
+ * This class stores the type of toy, the age group of the toy (which will be its destination chute)
+ * Must also be able to read the destinationshoot in the sorting machine
  */
 public class Present {
-    static int count = 0;
-    private String destinationShoot;
-    private String[] splittedData;
-    private int sackNumber;
-    private String name;
+    static int count = 0; // Counting all the presents in total, there will be multiple instances of this class for different sack numbers
+    private final String destinationShoot;
+    private final String[] splittedData;
+    private final int startingHopper;
+    private final String name;
     
     // To-do: sort this string itno appropiate variables
-    public Present(String dataForPresent, int sackNumber) {
+    public Present(String dataForPresent, int startingHopper) {
         splittedData = dataForPresent.split("\\s+");
-        System.out.println("Splitted data for present:" + dataForPresent);
+        //System.out.println("Splitted data for present:" + dataForPresent);
         destinationShoot = splittedData[0];
-        this.sackNumber = sackNumber;
+        this.startingHopper = startingHopper;
         count++;
         name = "Bob " + count;
     }
@@ -34,8 +40,8 @@ public class Present {
         return name;
     }
     
-    public int GetSackNumber() {
-        return sackNumber;
+    public int GetStartingHopper() {
+        return startingHopper;
     }
     
     public int GetCount() {

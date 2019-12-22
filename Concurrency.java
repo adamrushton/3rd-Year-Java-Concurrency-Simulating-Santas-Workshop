@@ -16,7 +16,7 @@ public class Concurrency {
      */
     public static void main(String[] args) {
         
-       Configuration config = new Configuration("config.cfg");
+       Configuration config = new Configuration("config2.txt");
        config.Run();
     }
     
