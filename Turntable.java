@@ -10,8 +10,8 @@ package concurrency;
  * @author Adam
  */
 public class Turntable extends Thread {
-    Present[] presents;
-    int count = 0;
+    Present present;
+    ConveyorBelt belt;
     String[] splittedData;
     final String INPUT_BELT = "ib";
     final String OUTPUT_BELT = "ob";
@@ -43,7 +43,7 @@ public class Turntable extends Thread {
 
     @Override
     public void run() {
-        DetectWaitingGift();
+        DetectWaitingGift(belt);
         // to-do run this 
     }
     public Turntable(String dataForTurntable) {
@@ -99,8 +99,8 @@ public class Turntable extends Thread {
     }
 
     public void DetectWaitingGift(ConveyorBelt belt) {
-        presents[count] = belt.Extract();
-        count++;
+        
+        present = belt.Extract();
         // Table turn to receive the gift        
         // obtain destination sack for present
         // Table turn to line up with appropriate output port
