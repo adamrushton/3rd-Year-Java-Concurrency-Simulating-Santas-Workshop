@@ -27,10 +27,10 @@ public final class Hopper extends Thread {
         beltId = Integer.parseInt(splittedData[2]);
         capacity = Integer.parseInt(splittedData[4]);
         speed = Integer.parseInt(splittedData[6]);
-        
+
         // Get all presents and get the connecting belt
         this.present = present;
-        
+
         this.belt = belt[beltId];
     }
 
@@ -40,11 +40,9 @@ public final class Hopper extends Thread {
     }
 
     private void AddPresentToConveyorBelt() {
-        // Passes 1 present onto the first conveyor belt        
-        if (!belt.BeltFull()) {
-            for (Present p : present) {
-                belt.Insert(p, p.GetCount());     
-            }
+        // Passes each present onto the first conveyor belt        
+        for (Present p : present) {
+            belt.put(p);
         }
     }
 

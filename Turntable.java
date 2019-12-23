@@ -17,7 +17,8 @@ public class Turntable extends Thread {
     final String OUTPUT_BELT = "ob";
     final String OUTPUT_SACK = "os";
     String turntableId;
-
+    String alignment1 = "North-South";
+    String alignment2 = "East-West";
     /*
     N E S W = North East South West
     ib = input belt (start belt)
@@ -99,8 +100,10 @@ public class Turntable extends Thread {
     }
 
     public void DetectWaitingGift(ConveyorBelt belt) {
-        
-        present = belt.Extract();
+        if (belt == null) {
+            System.out.println("Belt is null");
+        }
+
         // Table turn to receive the gift        
         // obtain destination sack for present
         // Table turn to line up with appropriate output port

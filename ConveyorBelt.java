@@ -13,21 +13,24 @@ public class ConveyorBelt {
 
     final int INDEX_OF_FIRST_DESTINATION = 4;
     Buffer produceBuffer, consumeBuffer;
-    
-    private Present[] presents;
-    private int nextIn = 0;
-    private int nextOut = 0;
+
     private int available;
-    
-    int beltId, maxOnBelt, presentCount;
+
+    int beltId, capacity;
     int[] destinations = null;
     String[] splittedData;
+    
+    public Object[] elements = null;
 
+    private int writePos = 0;
+    
     public ConveyorBelt(String dataForBelt) {
         splittedData = dataForBelt.split("\\s+");
         beltId = Integer.parseInt(splittedData[0]);
-        maxOnBelt = Integer.parseInt(splittedData[2]);
+        capacity = Integer.parseInt(splittedData[2]);
 
+        this.elements = new Object[capacity]; // Fixed size array
+        
         // index 4 til the end of the splitted data size is the amount of destinations
         destinations = new int[splittedData.length - INDEX_OF_FIRST_DESTINATION];
 
@@ -40,70 +43,55 @@ public class ConveyorBelt {
         }
 
     }
+    
+    public void reset() {
+        this.writePos = 0;
+        this.available = 0;
+    }
 
-    // Needed methods
-    // Method for hopper to check if there is space
-    public boolean BeltFull() {
-        return maxOnBelt == available;
+    public int capacity() {
+        return this.capacity;
+    }
+
+    public int available() {
+        return this.available;
+    }
+
+    public int remainingCapacity() {
+        return this.capacity - this.available;
     }
     
-    public synchronized void Insert(Present item, int totalPresents){
-        if (presents == null) {
-            presents = new Present[totalPresents];
-        }
-        while (available == totalPresents){
-            System.out.println("insert waiting");
-            
-            try {
-                wait();
-            } catch (InterruptedException ex) {
-            }
-            
-        }
-        presents[nextIn] = item;
-        available += 1;
-        try {
-            Thread.sleep((int) (Math.random() * 10));
-        } catch (InterruptedException ex) {
-        }
-        nextIn++;
-        if(nextIn == presents.length){
-            nextIn = 0;
-        }
-        if (available == presents.length)
-            System.out.println("Buffer full. All presents added to conveyor");
-        notifyAll();
+    public boolean GiftAvailableForTurntable(Turntable table) {
+        
+        return false;
     }
-    
-    // Method for turntable to take a present
-    public synchronized Present Extract(){
-        while (available == 0){
-            System.out.println("extract waiting");
-            
-            try {
-                wait();
-            } catch (InterruptedException ex) {
+    // Returns true if space and added
+    // Returns false if not added
+    public boolean put(Object element) {
+        if (available < capacity) {
+            if (writePos >= capacity) {
+                writePos = 0;
             }
+            elements[writePos] = element;
+            writePos++;
+            available++;
+            System.out.println("Present added to the buffer");
+            return true;
         }
-        Present res = presents[nextOut];
-        try {
-            Thread.sleep((int) (Math.random() * 10));
-        } catch (InterruptedException ex) {
+        System.out.println("Present not added to the buffer, buffer is full");
+        return false;
+    }
+
+    public Object take() {
+        if (available == 0) {
+            return null;
         }
+        int nextSlot = writePos - available;
+        if (nextSlot < 0) {
+            nextSlot += capacity;
+        }
+        Object nextObj = elements[nextSlot];
         available--;
-
-        if (res==null)
-            System.out.println("Invalid present");
-
-        nextOut++;
-        if (nextOut==presents.length)
-            nextOut=0;
-
-        if (available == 0)
-            System.out.println("buffer empty");
-
-        notifyAll();
-        return res;
+        return nextObj;
     }
-    
 }
