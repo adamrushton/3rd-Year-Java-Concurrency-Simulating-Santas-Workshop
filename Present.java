@@ -5,6 +5,8 @@
  */
 package concurrency;
 
+import java.util.Arrays;
+
 /**
  *
  * @author Adam
@@ -16,32 +18,36 @@ package concurrency;
  * Must also be able to read the destinationshoot in the sorting machine
  */
 public class Present {
-    static int count = 0; // Counting all the presents in total, there will be multiple instances of this class for different sack numbers
-    private final String destinationShoot;
+    static int count = 0; // Counting all the presents in total, there will be multiple instances of this class for different hoppers
+    private final String destinationSack;
     private final String[] splittedData;
-    private final int startingHopper;
-    private final String name;
+    private final int hopperNumber;
+    private String name;
     
     // To-do: sort this string itno appropiate variables
-    public Present(String dataForPresent, int startingHopper) {
+    public Present(String dataForPresent, int hopperNumber) {
         splittedData = dataForPresent.split("\\s+");
-        //System.out.println("Splitted data for present:" + dataForPresent);
-        destinationShoot = splittedData[0];
-        this.startingHopper = startingHopper;
+        destinationSack = splittedData[0];
+        this.hopperNumber = hopperNumber;
+        System.out.println("Present created. Destination Sack: " + Arrays.toString(splittedData) + " Hopper Number: " + hopperNumber);
         count++;
-        name = "Bob " + count;
+        name = "Present " + count;
     }
-
-    public String GetDestinationShoot() {
-        return destinationShoot;
+    
+    public String GetDestinationSack() {
+        return destinationSack;
     }
     
     public String GetName() {
         return name;
     }
     
-    public int GetStartingHopper() {
-        return startingHopper;
+    public void SetName(String name) {
+        this.name = name;
+    }
+    
+    public int GetHopperNumber() {
+        return hopperNumber;
     }
     
     public int GetCount() {

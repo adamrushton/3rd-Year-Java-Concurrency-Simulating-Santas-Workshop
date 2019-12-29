@@ -5,6 +5,9 @@
  */
 package concurrency;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  *
  * @author Adam Hopper specification ARE Threads Store collection of Presents
@@ -15,40 +18,78 @@ package concurrency;
  */
 public final class Hopper extends Thread {
 
-    String[] splittedData;
-    Present[] present;
-    ConveyorBelt belt;
-    int hopperId, beltId, capacity, speed;
+    // Load presents and feed to belt
+    String[] splittedData; // Data from the file
+    Present[] presents;    // Array of presents 
+    ConveyorBelt enterBelt;// Storing only the belt that the hopper has access to
+    int hopperId, connectedBeltId, capacity, speed, presentId = 0;
     String range;
 
     Hopper(String dataForHopper, Present[] present, ConveyorBelt[] belt) {
         splittedData = dataForHopper.split("\\s+");
+        //this.present = new Present[present.length];
         hopperId = Integer.parseInt(splittedData[0]);
-        beltId = Integer.parseInt(splittedData[2]);
+        connectedBeltId = Integer.parseInt(splittedData[2]);
         capacity = Integer.parseInt(splittedData[4]);
         speed = Integer.parseInt(splittedData[6]);
+        speed = 5000;
+        int count = 0; // how many presents are for a particular hopper
 
-        // Get all presents and get the connecting belt
-        this.present = present;
+        // Only store a present if it is already existing here
+        for (Present p : present) {
+            if (p != null && p.GetHopperNumber() == hopperId) {
+                count++;
+            }
+        }
+        this.presents = new Present[count]; // create that many presents
 
-        this.belt = belt[beltId];
+        // add the presents to our presents collection
+        int presentCount = 0;
+        for (Present p : present) {
+            if (p != null && p.GetHopperNumber() == hopperId) {
+                this.presents[presentCount] = p;
+                presentCount++;
+            }
+        }
+        this.enterBelt = belt[connectedBeltId];
     }
 
+    /**
+     *
+     * ye
+     */
     @Override
     public void run() {
-        AddPresentToConveyorBelt();
+        while (presents.length > 0) {
+            AddPresentToConveyorBelt();
+        }
     }
 
     private void AddPresentToConveyorBelt() {
         // Passes each present onto the first conveyor belt        
-        for (Present p : present) {
-            belt.put(p);
+        for (Present p : presents) {
+            if (p != null) {
+                try {
+                    while (!enterBelt.FreeSpaceOnBelt()) {
+                        // Belt is full, unable to put any more presents on the belt. Sleep and try again
+                        Thread.sleep(speed);
+                        System.out.println("Belt is full so sleeping and gonna try again");
+                    }
+                    enterBelt.EnterBelt(p);
+                    System.out.println("Hopper " + hopperId + " added P [" + p.GetDestinationSack() + "] to the buffer");
+
+                    p = null;     // Present no longer in the hopper. 
+                    sleep(speed); // Sleep to simulate present being added to the belt            
+                } catch (InterruptedException ex) {
+                    System.out.println("Failed adding or sleeping");
+                }
+            }
         }
     }
 
     public int GetPresentCount() {
-        if (present != null) {
-            return present.length;
+        if (presents != null) {
+            return presents.length - 3;
         }
         return -1; // This will happen when the id on presents doesnt match a hopper id
     }
@@ -57,19 +98,11 @@ public final class Hopper extends Thread {
         return hopperId;
     }
 
-    public int GetBeltId() {
-        return beltId;
+    public int GetConnectedBeltId() {
+        return connectedBeltId;
     }
 
     public int GetCapacity() {
         return capacity;
-    }
-
-    public int GetSpeed() {
-        return speed;
-    }
-
-    public String GetRange() {
-        return range;
     }
 }

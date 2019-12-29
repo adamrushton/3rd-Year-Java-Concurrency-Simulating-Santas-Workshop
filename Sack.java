@@ -16,14 +16,12 @@ package concurrency;
  */
 public class Sack {
     private final String[] splittedData;
-
+    private Present[] presentsInSack;
     private final int sackId;
     private final int capacity;
     private final String ageRange;
-    private int presentCount;
+    private int presentCount = 0;
     private int available;
-    private int nextIn = 0;
-    private int nextOut = 0;
     private String[] buffer;
 
     // TO-DO: sort this data out into appropiate variables
@@ -34,6 +32,12 @@ public class Sack {
         ageRange = splittedData[4];
     }     
 
+    public void Insert(Present present) {
+        presentsInSack[presentCount] = present;
+        System.out.println("Present: " + presentsInSack[presentCount].GetDestinationSack() + " has entered sack " + ageRange);
+        presentCount++;
+    }
+    
     public int GetSackId() {
         return sackId;
     }
@@ -41,9 +45,9 @@ public class Sack {
     public int GetCapacity() {
         return capacity;
     }
-    // Check if sack is full
+
     public boolean IsFull() {
-        return capacity == nextIn;
+        return capacity == presentCount;
     }
     
     public String GetAgeRange() {
@@ -53,66 +57,5 @@ public class Sack {
     public int GetPresentCount() {
         return presentCount;
     }
-    
-    public void InsertPresent(Present p) {
-        
-    }
-    
-    public void Insert(String item) {
-        while (available == buffer.length) {
-            System.out.println("Insert waiting");
-            try {
-                wait();
-            } catch (InterruptedException ex) {
-
-            }
-            buffer[nextIn] = item;
-            available += 1;
-            try {
-                Thread.sleep(75);
-            } catch (InterruptedException ex) {
-                System.out.println("Failed to sleep." + ex);
-            }
-            nextIn++;
-            if (nextIn == buffer.length) {
-                nextIn = 0;
-            }
-            if (available == buffer.length) {
-                System.out.println("The sack is full of presents!");
-            }
-            notifyAll();
-        }
-    }
-
-    public synchronized String Extract() {
-        String res = "";
-        while (available == 0) {
-            System.out.println("Waiting to extract");
-
-            try {
-                wait();
-            } catch (InterruptedException ex) {
-                System.out.println("Failed to wait." + ex);
-            }
-        }
-        res = buffer[nextOut];
-        try {
-            Thread.sleep(75);
-        } catch (InterruptedException ex) {
-            System.out.println("Failed to sleep." + ex);
-        }
-        available--;
-        if (res == null) {
-            res = "invalid present";
-        }
-        nextOut++;
-        if (nextOut == buffer.length) {
-            nextOut = 0;
-        }
-        if (available == 0) {
-           System.out.println("No presents in the sack");
-        }
-        notifyAll();
-        return res;
-    }
+   
 }

@@ -26,9 +26,9 @@ public class Configuration {
     private List<String> hoppers = new ArrayList<>();
     private List<String> sacks = new ArrayList<>();
     private List<String> turntables = new ArrayList<>();
-    private List<String> presents = new ArrayList<>();
+    private List<String> firstPresents = new ArrayList<>();
     private List<String> timer = new ArrayList<>();
-
+    public static boolean isRunning = false;
     // Read from Config file
     // Create Hoppers, Belts, Turntables and Sacks based on the file
     // Fill hoppers with Presents according to the configuration file
@@ -58,60 +58,74 @@ public class Configuration {
         hoppers = LoadImportantDetailsFromFile("speed");
         sacks = LoadImportantDetailsFromFile("age");
         turntables = LoadImportantDetailsFromFile("ib");
-        presents = LoadImportantDetailsFromFile("-");
+        firstPresents = LoadImportantDetailsFromFile("-");
         timer = LoadImportantDetailsFromFile("TIMER");
-        delay = Integer.parseInt(timer.get(0).replaceAll("[\\D]", ""));
+        
+        System.out.println("Presents: " + firstPresents);
+        
+        if (belts == null || hoppers == null || sacks == null || turntables == null || firstPresents == null || timer == null) {
+            System.out.println("An error occured reading in the file.");
+            System.out.println("Belts: " + belts);
+            System.out.println("Hoppers: " + hoppers);
+            System.out.println("Sacks: " + sacks);
+            System.out.println("Turntables: " + turntables);
+            System.out.println("Presents: " + firstPresents);
+            System.out.println("Timer: " + timer);
+            System.out.println("Terminated program.");
+            return;
+        }
 
-        long numOfPresentHeadings = presents.stream().filter(p -> p.contains("PRESENTS")).count();
-        // Currently supporting one PRESENT instance from the config file
-        int startingHopper = Integer.parseInt(presents.get(0).replaceAll("[\\D]", ""));
-        presents.remove(0);
+        delay = Integer.parseInt(timer.get(0).replaceAll("[\\D]", ""));
 
         // Creation of the objects
         ConveyorBelt[] belt = new ConveyorBelt[belts.size()];
         Hopper[] hopper = new Hopper[hoppers.size()];
         Sack[] sack = new Sack[sacks.size()];
         Turntable[] turntable = new Turntable[turntables.size()];
-        Present[] present = new Present[presents.size()];
+        Present[] present = new Present[firstPresents.size()];
         
-        // The presents go into the hopper given from the file
-        // Make this randomise which hopper its goes in next time
-        
-        for (int i = 0; i < presents.size(); i++) {
-            present[i] = new Present(presents.get(i), startingHopper);
+        int hopperId = 0;
+        int presentId = 0;
+        for (int i = 0; i < firstPresents.size(); i++) {
+            if (firstPresents.get(i).contains("PRESENT")) {
+                hopperId = Integer.parseInt(firstPresents.get(i).substring(firstPresents.get(i).indexOf(" ")+1));
+            } else {           
+                present[presentId] = new Present(firstPresents.get(i), hopperId);                
+                presentId++;
+            }
         }
-        
+
         for (int i = 0; i < sacks.size(); i++) {
             sack[i] = new Sack(sacks.get(i));
         }
 
-        for (int i = 0; i < turntables.size(); i++) {
-            turntable[i] = new Turntable(turntables.get(i));
-            turntable[i].start();
-        }
         for (int i = 0; i < belts.size(); i++) {
             belt[i] = new ConveyorBelt(belts.get(i));
         }
-
+        
+        isRunning = true;
+        
+        // Turntables are threads
+        for (int i = 0; i < turntables.size(); i++) {
+            turntable[i] = new Turntable(turntables.get(i), belt);
+            turntable[i].start();
+        }
+        
+        // Hoppers are threads
+        // Create an array of present for each hopper.
+        
         for (int i = 0; i < hoppers.size(); i++) {
             hopper[i] = new Hopper(hoppers.get(i), present, belt);
             hopper[i].start();
         }
 
-        System.out.println("Present classes: " + present.length);
-        System.out.println("Belt classes: " + belt.length);
-        System.out.println("Hopper classes: " + hopper.length);
-        System.out.println("Sack classes: " + sack.length);
-        System.out.println("Turntable classes: " + turntable.length);
         System.out.println("Started " + hoppers.size() + " Hopper threads");
-        System.out.println("Presents in Hopper: " + hopper[0].GetPresentCount());
+        System.out.println("Presents in Hopper 1: " + hopper[1].GetPresentCount());
         System.out.println("Started " + turntables.size() + " Turntable threads");
         System.out.println("Turntable and Hopper threads started.");
-
-        // Everything is now set up. Need to start concurrency
-        // Concurrency
+        //System.out.println("time: " + timeElapsed);
     }
-
+    
     public Configuration(String fileName) {
         this.fileName = fileName;
     }
